@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ferminal</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   <style>
     :root {
       --bg: #0d0d0d;
@@ -14,7 +14,7 @@
       --primary: #9dcc9a;
       --input-bg: #1a1a1a;
     }
-    
+
     body {
       font-family: 'SF Mono', monospace;
       background: var(--bg);
@@ -22,16 +22,15 @@
       margin: 0;
       line-height: 1.5;
       min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
-    
-    /* Layout */
+
     #app {
       display: flex;
       min-height: 100vh;
     }
-    
-    /* Animated Sidebar */
-    .sidebar {
+
+    nav.sidebar {
       width: 56px;
       background: var(--card);
       border-right: 1px solid var(--accent);
@@ -41,11 +40,11 @@
       align-items: center;
       transition: transform 0.2s ease;
     }
-    
-    .sidebar:hover {
+
+    nav.sidebar:hover {
       transform: scaleX(1.1);
     }
-    
+
     .sidebar-icon {
       width: 40px;
       height: 40px;
@@ -56,38 +55,34 @@
       color: var(--primary);
       transition: all 0.3s ease;
     }
-    
+
     .sidebar-icon:hover {
       background: var(--accent);
       transform: scale(1.1);
     }
-    
-    /* Terminal container */
+
     .terminal-container {
       flex: 1;
       display: flex;
       flex-direction: column;
     }
-    
-    /* Output area */
+
     .terminal-output {
       padding: 24px;
       overflow-y: auto;
       flex-grow: 1;
       scroll-behavior: smooth;
     }
-    
-    /* Command prompt styling */
+
     .prompt {
       color: var(--primary);
       font-weight: bold;
     }
-    
+
     .command {
       margin-bottom: 16px;
     }
-    
-    /* Perfect Input Area */
+
     .input-container {
       padding: 12px 24px;
       background: var(--input-bg);
@@ -95,7 +90,7 @@
       position: sticky;
       bottom: 0;
     }
-    
+
     .input-line {
       display: flex;
       align-items: center;
@@ -105,12 +100,12 @@
       padding: 8px 12px;
       transition: all 0.2s ease;
     }
-    
+
     .input-line:focus-within {
       border-color: var(--primary);
       box-shadow: 0 0 0 1px var(--primary);
     }
-    
+
     #command-input {
       background: transparent;
       border: none;
@@ -123,8 +118,7 @@
       padding: 0;
       margin-left: 4px;
     }
-    
-    /* Content cards */
+
     .card {
       background: var(--card);
       border: 1px solid var(--accent);
@@ -134,11 +128,11 @@
       max-width: 800px;
       transition: transform 0.2s ease;
     }
-    
+
     .card:hover {
       transform: translateY(-2px);
     }
-    
+
     .card-title {
       margin: 0 0 12px 0;
       color: var(--primary);
@@ -148,54 +142,43 @@
       align-items: center;
       gap: 8px;
     }
-    
-    /* Tool items */
+
     .tool-item {
       margin-bottom: 8px;
       padding-left: 16px;
       position: relative;
       transition: all 0.2s ease;
     }
-    
+
     .tool-item:hover {
       transform: translateX(4px);
     }
-    
+
     .tool-item:before {
       content: "•";
       position: absolute;
       left: 0;
       color: var(--primary);
     }
-    
+
     .tool-link {
       color: var(--primary);
       text-decoration: none;
       transition: all 0.2s ease;
     }
-    
+
     .tool-link:hover {
       text-decoration: underline;
       color: #b5e3b2;
     }
-    
+
     .tool-desc {
       color: var(--text);
       opacity: 0.8;
       font-size: 0.9rem;
       margin-left: 8px;
     }
-    
-    /* Network command sections */
-    .network-section {
-      margin-bottom: 20px;
-    }
-    
-    .network-section:last-child {
-      margin-bottom: 0;
-    }
-    
-    /* Status bar */
+
     .status-bar {
       background: var(--card);
       border-top: 1px solid var(--accent);
@@ -205,21 +188,20 @@
       font-size: 0.8rem;
       color: var(--primary);
     }
-    
-    /* Scrollbar styling */
+
     .terminal-output::-webkit-scrollbar {
       width: 8px;
     }
-    
+
     .terminal-output::-webkit-scrollbar-track {
       background: var(--card);
     }
-    
+
     .terminal-output::-webkit-scrollbar-thumb {
       background: var(--accent);
       border-radius: 4px;
     }
-    
+
     .terminal-output::-webkit-scrollbar-thumb:hover {
       background: var(--primary);
     }
@@ -227,17 +209,14 @@
 </head>
 <body>
   <div id="app">
-    <!-- Animated Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-icon">
+    <nav class="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-icon" aria-label="Terminal">
         <i data-lucide="terminal"></i>
       </div>
-    </div>
+    </nav>
     
-    <!-- Terminal -->
-    <div class="terminal-container">
-      <!-- Output -->
-      <div class="terminal-output" id="terminal-output">
+    <div class="terminal-container" role="main">
+      <div class="terminal-output" id="terminal-output" aria-live="polite">
         <div class="command">
           <span class="prompt">ferminal ~ $</span> help
         </div>
@@ -248,17 +227,17 @@
         <div>- antivirus: Show security tools</div>
         <div>- network: Show firewall/DNS/VPN tools</div>
         <div>- media: Show media applications</div>
+        <div>- other: List other applications</div>
+        <div>- about: Show information about this terminal</div>
       </div>
       
-      <!-- Perfect Input Area -->
       <div class="input-container">
         <div class="input-line">
           <span class="prompt">~ $</span>
-          <input type="text" id="command-input" autofocus placeholder="Type a command...">
+          <input type="text" id="command-input" autofocus placeholder="Type a command..." aria-label="Command input" autocomplete="off">
         </div>
       </div>
       
-      <!-- Status bar -->
       <div class="status-bar">
         <div>READY</div>
         <div>UTF-8</div>
@@ -268,144 +247,94 @@
   </div>
 
   <script>
-    // Initialize icons immediately
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       
-      // Command processing
       const terminal = document.getElementById('terminal-output');
       const input = document.getElementById('command-input');
       let commandHistory = [];
       let historyIndex = -1;
-      
-      // Complete tools data
+
       const tools = {
         "Windows & Hardware Tools": [
-          {
-            name: "PC-Optimization-Hub",
-            url: "https://github.com/BoringBoredom/PC-Optimization-Hub",
-            desc: "(Further) Optimize your PC."
-          },
-          {
-            name: "HWiNFO",
-            url: "https://www.hwinfo.com/",
-            desc: "Comprehensive hardware analysis."
-          },
-          {
-            name: "NVCleanstall",
-            url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall/",
-            desc: "Customized/stripped NVIDIA drivers."
-          },
-          {
-            name: "RadeonSoftwareSlimmer",
-            url: "https://github.com/GSDragoon/RadeonSoftwareSlimmer",
-            desc: "Utility to trim down the bloat with Radeon Software for AMD GPUs."
-          },
-          {
-            name: "NanaRun",
-            url: "https://github.com/M2Team/NanaRun",
-            desc: "Be the SU(DO) Microsoft doesn't want you to be."
-          }
+          { name: "PC-Optimization-Hub", url: "https://github.com/BoringBoredom/PC-Optimization-Hub", desc: "For further optimizations. Make sure you know what you are doing first." },
+          { name: "PowerToys", url: "https://learn.microsoft.com/en-us/windows/powertoys/", desc: "The official Microsoft powertoys, includes tools such as color picker and hosts file editor." },
+          { name: "Process Explorer", url: "https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer", desc: "Better Task Manager." },
+          { name: "WUMT", url: "https://www.majorgeeks.com/files/details/windows_update_minitool.html", desc: "Windows Update MiniTool, useful for finding drivers directly from Microsoft." },
+          { name: "SuperF4", url: "https://stefansundin.github.io/superf4/", desc: "Kill programs instantly." },
+          { name: "NanaRun", url: "https://github.com/M2Team/NanaRun", desc: "Be the SU(DO) Microsoft doesn't want you to be." },
+          { name: "ThrottleStop", url: "https://www.techpowerup.com/download/techpowerup-throttlestop/", desc: "Laptop CPU monitor and optimizer." },
+          { name: "g-helper", url: "https://github.com/seerge/g-helper", desc: "Lightweight Armoury Crate alternative for Asus laptops and ROG Ally." },
+          { name: "Lenovo Vantage", url: "https://github.com/BartoszCichecki/LenovoLegionToolkit", desc: "Lightweight Lenovo Vantage and hotkeys replacement for Lenovo Legion laptops." },
+          { name: "UniGetUI", url: "https://www.marticliment.com/unigetui/", desc: "GUI for popular package managers." },
+          { name: "rustdesk", url: "https://rustdesk.com/", desc: "Remote Access / Remote Desktop software." },
+          { name: "VirtualBox", url: "https://www.virtualbox.org/", desc: "Virtualization software, portable version." },
+          { name: "HWiNFO", url: "https://www.hwinfo.com/", desc: "Comprehensive hardware analysis." },
+          { name: "NVCleanstall", url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall/", desc: "Customized/stripped NVIDIA drivers." },
+          { name: "TinyNvidiaUpdateChecker", url: "https://github.com/ElPumpo/TinyNvidiaUpdateChecker", desc: "Tiny program to check for driver updates." },
+          { name: "nvidiaProfileInspector", url: "https://github.com/Orbmu2k/nvidiaProfileInspector", desc: "Modify or view hidden NVIDIA settings." },
+          { name: "RadeonSoftwareSlimmer", url: "https://github.com/GSDragoon/RadeonSoftwareSlimmer", desc: "Utility to trim down the bloat with Radeon Software for AMD GPUs." },
+          { name: "rdn-id", url: "https://rdn-id.com/", desc: "3rd party AMD drivers." },
+          { name: "RyzenAdj", url: "https://github.com/FlyGoat/RyzenAdj", desc: "Ryzen laptop GPU Controller." },
+          { name: "Universal x86", url: "https://amdaputuningutility.com/", desc: "Laptop GPU controller (INTEL/AMD)." },
+          { name: "DisplayFusion", url: "https://www.displayfusion.com/", desc: "Dual/Multiple monitor tools, such as multi-monitor taskbars, splitting, fading, wallpapers, etc." },
+          { name: "OpenRGB", url: "https://openrgb.org/", desc: "RGB Lighting control." },
+          { name: "Cursor", url: "https://cursor.design/", desc: "macOS cursors ported to Windows." },
+          { name: "HackBGRT", url: "https://github.com/Metabolix/HackBGRT", desc: "Windows boot logo changer for UEFI systems." },
+          { name: "LowLevelFormat", url: "https://www.lowlevelformat.info/", desc: "Completely erase your (hard)drive." }
         ],
         "Antivirus & Security": [
-          {
-            name: "MalwareBytes",
-            url: "https://www.malwarebytes.com/"
-          },
-          {
-            name: "r/antivirus",
-            url: "https://www.reddit.com/r/antivirus/wiki/index/"
-          }
+          { name: "MalwareBytes", url: "https://www.malwarebytes.com/" },
+          { name: "r/antivirus", url: "https://www.reddit.com/r/antivirus/wiki/index/" }
         ],
         "Firewall & DNS": [
-          {
-            name: "safing",
-            url: "https://safing.io/"
-          },
-          {
-            name: "Fort",
-            url: "https://github.com/tnodir/fort"
-          }
+          { name: "safing", url: "https://safing.io/" },
+          { name: "Fort", url: "https://github.com/tnodir/fort" }
         ],
         "VPN Services": [
-          {
-            name: "WARP",
-            url: "https://one.one.one.one/"
-          },
-          {
-            name: "RiseupVPN",
-            url: "https://riseup.net/en/vpn"
-          }
+          { name: "WARP", url: "https://one.one.one.one/" },
+          { name: "RiseupVPN", url: "https://riseup.net/en/vpn" }
         ],
         "Media Applications": [
-          {
-            name: "Stremio",
-            url: "https://www.stremio.com/",
-            desc: "Use its addon system for complete streaming.",
-            subitems: [
-              {
-                name: "torrentio",
-                url: "https://torrentio.strem.fun/configure",
-                desc: "Recommended free addon."
-              }
-            ]
-          },
-          {
-            name: "SpotX",
-            url: "https://github.com/SpotX-Official/SpotX",
-            desc: "Patches for official Spotify desktop client.",
-            subitems: [
-              {
-                name: "Spicetify",
-                url: "https://spicetify.app/",
-                desc: "CLI tool for customizing Spotify."
-              }
-            ]
-          },
-          {
-            name: "MusicBee",
-            url: "https://getmusicbee.com/",
-            desc: "Alternative music player with addons/themes."
-          },
-          {
-            name: "mpv",
-            url: "https://mpv.io/",
-            desc: "Universal media player.",
-            subitems: [
-              {
-                name: "Example config",
-                url: "https://github.com/dyphire/mpv-config/tree/eng"
-              }
-            ]
-          },
-          {
-            name: "qView",
-            url: "https://interversehq.com/qview/",
-            desc: "Image viewer."
-          }
+          { name: "Stremio", url: "https://www.stremio.com/", desc: "Use its addon system for complete streaming.", subitems: [{ name: "torrentio", url: "https://torrentio.strem.fun/configure", desc: "Recommended free addon." }] },
+          { name: "SpotX", url: "https://github.com/SpotX-Official/SpotX", desc: "Patches for official Spotify desktop client.", subitems: [{ name: "Spicetify", url: "https://spicetify.app/", desc: "CLI tool for customizing Spotify." }] },
+          { name: "MusicBee", url: "https://getmusicbee.com/", desc: "Alternative music player with addons/themes." },
+          { name: "mpv", url: "https://mpv.io/", desc: "Universal media player." },
+          { name: "qView", url: "https://interversehq.com/qview/", desc: "Image viewer." }
+        ],
+        "Other Applications": [
+          { name: "Discord3rdparties", url: "https://github.com/Discord-Client-Encyclopedia-Management/Discord3rdparties", desc: "Discord clients index." },
+          { name: "materialgram", url: "https://kukuruzka165.github.io/materialgram/", desc: "Telegram desktop client with many improvements, also portable." },
+          { name: "caprine", url: "https://github.com/sindresorhus/caprine", desc: "Facebook Messenger desktop app." },
+          { name: "altus", url: "https://github.com/amanharwara/altus", desc: "WhatsApp desktop app." },
+          { name: "Orion", url: "https://alamminsalo.github.io/orion/", desc: "Cross-platform Twitch client." },
+          { name: "LocalSend", url: "https://localsend.org/", desc: "Cross-platform AirDrop alternative." },
+          { name: "NotepadNext", url: "https://github.com/dail8859/NotepadNext", desc: "Cross-platform reimplementation of Notepad++." },
+          { name: "Ascendara", url: "https://ascendara.app/", desc: "A game launcher with great capabilities." },
+          { name: "Heroic", url: "https://heroicgameslauncher.com/", desc: "Epic, GOG and Prime Games launcher." },
+          { name: "Flameshot", url: "https://flameshot.org/", desc: "Screenshot software." }
         ]
       };
 
       function processCommand(cmd) {
         if (!cmd.trim()) return;
-        
-        // Add to history
+
         commandHistory.push(cmd);
         historyIndex = commandHistory.length;
-        
-        // Add command to output
+
         const commandElement = document.createElement('div');
-        commandElement.className = 'command';
+        commandElement.className = 'command'; 
         commandElement.innerHTML = `<span class="prompt">ferminal ~ $</span> ${cmd}`;
         terminal.appendChild(commandElement);
-        
-        // Process command
+
         const response = document.createElement('div');
-        
+
         if (cmd === 'clear') {
           terminal.innerHTML = '';
           return;
-        } else if (cmd === 'help') {
+        } 
+        
+        if (cmd === 'help') {
           response.innerHTML = `
             <div>Available commands:</div>
             <div>- help: Show this message</div>
@@ -414,13 +343,24 @@
             <div>- antivirus: Show security tools</div>
             <div>- network: Show firewall/DNS/VPN tools</div>
             <div>- media: Show media applications</div>
+            <div>- other: List other applications</div>
+            <div>- about: Show information about this terminal</div>
           `;
-        } else if (['tools', 'antivirus', 'network', 'media'].includes(cmd)) {
+        } else if (cmd === 'about') {
+          response.innerHTML = `
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="info"></i> About This Terminal</h3>
+              <div>This is a terminal-search webpage, made for people looking for free/alternative software on a modified Windows installation. It's also a personal learning project.</div>
+            </div>
+          `;
+          terminal.appendChild(response);
+          lucide.createIcons(); // Ensure icons are created immediately after the card is appended
+          return; // Exit after processing the about command
+        } else if (['tools', 'antivirus', 'network', 'media', 'other'].includes(cmd)) {
           const card = document.createElement('div');
           card.className = 'card';
-          
+
           if (cmd === 'network') {
-            // Special handling for network command
             card.innerHTML = `
               <div class="network-section">
                 <h3 class="card-title"><i data-lucide="shield"></i> Firewall & DNS</h3>
@@ -431,63 +371,55 @@
                 ${renderTools(tools["VPN Services"])}
               </div>
             `;
+          } else if (cmd === 'other') {
+            card.innerHTML = `
+              <h3 class="card-title"><i data-lucide="grid"></i> Other Applications</h3>
+              ${renderTools(tools["Other Applications"])}
+            `;
           } else {
-            // Standard category display
             const categoryMap = {
               tools: { name: "Windows & Hardware Tools", icon: "cpu" },
               antivirus: { name: "Antivirus & Security", icon: "shield" },
               media: { name: "Media Applications", icon: "play" }
             };
-            
+
             const category = categoryMap[cmd];
             card.innerHTML = `
               <h3 class="card-title"><i data-lucide="${category.icon}"></i> ${category.name}</h3>
               ${renderTools(tools[category.name])}
             `;
           }
-          
+
           response.appendChild(card);
-          // Refresh icons immediately after adding new elements
-          setTimeout(() => lucide.createIcons(), 0);
+          terminal.appendChild(response);
+          lucide.createIcons(); // Ensure icons are created after appending the card
         } else {
           response.textContent = `Command not found: ${cmd}. Type 'help' for available commands.`;
         }
-        
+
         terminal.appendChild(response);
-        terminal.scrollTop = terminal.scrollHeight;
+        terminal.scrollTop = terminal.scrollHeight; // Scroll to the bottom
         input.focus();
       }
-      
+
       function renderTools(toolList, indent = 0) {
-        let html = '';
-        for (const tool of toolList) {
-          html += `
-            <div class="tool-item" style="padding-left: ${16 + (indent * 16)}px">
-              ${tool.url ? `<a href="${tool.url}" class="tool-link" target="_blank">${tool.name}</a>` : tool.name}
-              ${tool.desc ? `<span class="tool-desc">${tool.desc}</span>` : ''}
-            </div>
-          `;
-          
-          if (tool.subitems) {
-            html += renderTools(tool.subitems, indent + 1);
-          }
-        }
-        return html;
+        return toolList.map(tool => `
+          <div class="tool-item" style="padding-left: ${16 + (indent * 16)}px">
+            ${tool.url ? `<a href="${tool.url}" class="tool-link" target="_blank">${tool.name}</a>` : tool.name}
+            ${tool.desc ? `<span class="tool-desc">${tool.desc}</span>` : ''}
+          </div>
+        `).join('');
       }
-      
-      // Handle input
+
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           processCommand(input.value);
           input.value = '';
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          if (commandHistory.length > 0) {
-            if (historyIndex > 0) historyIndex--;
-            if (historyIndex >= 0) {
-              input.value = commandHistory[historyIndex];
-              input.selectionStart = input.selectionEnd = input.value.length;
-            }
+          if (historyIndex > 0) {
+            historyIndex--;
+            input.value = commandHistory[historyIndex] || '';
           }
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
@@ -498,16 +430,11 @@
             historyIndex = commandHistory.length;
             input.value = '';
           }
-          input.selectionStart = input.selectionEnd = input.value.length;
         }
+        input.selectionStart = input.selectionEnd = input.value.length;
       });
-      
-      // Focus input on click anywhere
-      document.addEventListener('click', () => {
-        input.focus();
-      });
-      
-      // Initial focus
+
+      document.addEventListener('click', () => input.focus());
       input.focus();
     });
   </script>
