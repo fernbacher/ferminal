@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ferminal</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --accent: #262626;
+      --text: #e6e6e6;
+      --primary: #9dcc9a;
+      --input-bg: #1a1a1a;
+    }
+    
+    body {
+      font-family: 'SF Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    /* Layout */
+    #app {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Animated Sidebar */
+    .sidebar {
+      width: 56px;
+      background: var(--card);
+      border-right: 1px solid var(--accent);
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+    
+    .sidebar:hover {
+      transform: scaleX(1.1);
+    }
+    
+    .sidebar-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      color: var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-icon:hover {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+    
+    /* Terminal container */
+    .terminal-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Output area */
+    .terminal-output {
+      padding: 24px;
+      overflow-y: auto;
+      flex-grow: 1;
+      scroll-behavior: smooth;
+    }
+    
+    /* Command prompt styling */
+    .prompt {
+      color: var(--primary);
+      font-weight: bold;
+    }
+    
+    .command {
+      margin-bottom: 16px;
+    }
+    
+    /* Perfect Input Area */
+    .input-container {
+      padding: 12px 24px;
+      background: var(--input-bg);
+      border-top: 1px solid var(--accent);
+      position: sticky;
+      bottom: 0;
+    }
+    
+    .input-line {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 12px;
+      transition: all 0.2s ease;
+    }
+    
+    .input-line:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    
+    #command-input {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      flex: 1;
+      outline: none;
+      caret-color: var(--primary);
+      padding: 0;
+      margin-left: 4px;
+    }
+    
+    /* Content cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      max-width: 800px;
+      transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .card-title {
+      margin: 0 0 12px 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Tool items */
+    .tool-item {
+      margin-bottom: 8px;
+      padding-left: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .tool-item:hover {
+      transform: translateX(4px);
+    }
+    
+    .tool-item:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+    
+    .tool-link {
+      color: var(--primary);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    
+    .tool-link:hover {
+      text-decoration: underline;
+      color: #b5e3b2;
+    }
+    
+    .tool-desc {
+      color: var(--text);
+      opacity: 0.8;
+      font-size: 0.9rem;
+      margin-left: 8px;
+    }
+    
+    /* Network command sections */
+    .network-section {
+      margin-bottom: 20px;
+    }
+    
+    .network-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* Status bar */
+    .status-bar {
+      background: var(--card);
+      border-top: 1px solid var(--accent);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--primary);
+    }
+    
+    /* Scrollbar styling */
+    .terminal-output::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .terminal-output::-webkit-scrollbar-track {
+      background: var(--card);
+    }
+    
+    .terminal-output::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+    }
+    
+    .terminal-output::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Animated Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-icon">
+        <i data-lucide="terminal"></i>
+      </div>
+    </div>
+    
+    <!-- Terminal -->
+    <div class="terminal-container">
+      <!-- Output -->
+      <div class="terminal-output" id="terminal-output">
+        <div class="command">
+          <span class="prompt">ferminal ~ $</span> help
+        </div>
+        <div>Available commands:</div>
+        <div>- help: Show this message</div>
+        <div>- clear: Clear terminal</div>
+        <div>- tools: List Windows/Hardware tools</div>
+        <div>- antivirus: Show security tools</div>
+        <div>- network: Show firewall/DNS/VPN tools</div>
+        <div>- media: Show media applications</div>
+      </div>
+      
+      <!-- Perfect Input Area -->
+      <div class="input-container">
+        <div class="input-line">
+          <span class="prompt">~ $</span>
+          <input type="text" id="command-input" autofocus placeholder="Type a command...">
+        </div>
+      </div>
+      
+      <!-- Status bar -->
+      <div class="status-bar">
+        <div>READY</div>
+        <div>UTF-8</div>
+        <div>100%</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize icons immediately
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      
+      // Command processing
+      const terminal = document.getElementById('terminal-output');
+      const input = document.getElementById('command-input');
+      let commandHistory = [];
+      let historyIndex = -1;
+      
+      // Complete tools data
+      const tools = {
+        "Windows & Hardware Tools": [
+          {
+            name: "PC-Optimization-Hub",
+            url: "https://github.com/BoringBoredom/PC-Optimization-Hub",
+            desc: "(Further) Optimize your PC."
+          },
+          {
+            name: "HWiNFO",
+            url: "https://www.hwinfo.com/",
+            desc: "Comprehensive hardware analysis."
+          },
+          {
+            name: "NVCleanstall",
+            url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall/",
+            desc: "Customized/stripped NVIDIA drivers."
+          },
+          {
+            name: "RadeonSoftwareSlimmer",
+            url: "https://github.com/GSDragoon/RadeonSoftwareSlimmer",
+            desc: "Utility to trim down the bloat with Radeon Software for AMD GPUs."
+          },
+          {
+            name: "NanaRun",
+            url: "https://github.com/M2Team/NanaRun",
+            desc: "Be the SU(DO) Microsoft doesn't want you to be."
+          }
+        ],
+        "Antivirus & Security": [
+          {
+            name: "MalwareBytes",
+            url: "https://www.malwarebytes.com/"
+          },
+          {
+            name: "r/antivirus",
+            url: "https://www.reddit.com/r/antivirus/wiki/index/"
+          }
+        ],
+        "Firewall & DNS": [
+          {
+            name: "safing",
+            url: "https://safing.io/"
+          },
+          {
+            name: "Fort",
+            url: "https://github.com/tnodir/fort"
+          }
+        ],
+        "VPN Services": [
+          {
+            name: "WARP",
+            url: "https://one.one.one.one/"
+          },
+          {
+            name: "RiseupVPN",
+            url: "https://riseup.net/en/vpn"
+          }
+        ],
+        "Media Applications": [
+          {
+            name: "Stremio",
+            url: "https://www.stremio.com/",
+            desc: "Use its addon system for complete streaming.",
+            subitems: [
+              {
+                name: "torrentio",
+                url: "https://torrentio.strem.fun/configure",
+                desc: "Recommended free addon."
+              }
+            ]
+          },
+          {
+            name: "SpotX",
+            url: "https://github.com/SpotX-Official/SpotX",
+            desc: "Patches for official Spotify desktop client.",
+            subitems: [
+              {
+                name: "Spicetify",
+                url: "https://spicetify.app/",
+                desc: "CLI tool for customizing Spotify."
+              }
+            ]
+          },
+          {
+            name: "MusicBee",
+            url: "https://getmusicbee.com/",
+            desc: "Alternative music player with addons/themes."
+          },
+          {
+            name: "mpv",
+            url: "https://mpv.io/",
+            desc: "Universal media player.",
+            subitems: [
+              {
+                name: "Example config",
+                url: "https://github.com/dyphire/mpv-config/tree/eng"
+              }
+            ]
+          },
+          {
+            name: "qView",
+            url: "https://interversehq.com/qview/",
+            desc: "Image viewer."
+          }
+        ]
+      };
+
+      function processCommand(cmd) {
+        if (!cmd.trim()) return;
+        
+        // Add to history
+        commandHistory.push(cmd);
+        historyIndex = commandHistory.length;
+        
+        // Add command to output
+        const commandElement = document.createElement('div');
+        commandElement.className = 'command';
+        commandElement.innerHTML = `<span class="prompt">ferminal ~ $</span> ${cmd}`;
+        terminal.appendChild(commandElement);
+        
+        // Process command
+        const response = document.createElement('div');
+        
+        if (cmd === 'clear') {
+          terminal.innerHTML = '';
+          return;
+        } else if (cmd === 'help') {
+          response.innerHTML = `
+            <div>Available commands:</div>
+            <div>- help: Show this message</div>
+            <div>- clear: Clear terminal</div>
+            <div>- tools: List Windows/Hardware tools</div>
+            <div>- antivirus: Show security tools</div>
+            <div>- network: Show firewall/DNS/VPN tools</div>
+            <div>- media: Show media applications</div>
+          `;
+        } else if (['tools', 'antivirus', 'network', 'media'].includes(cmd)) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          
+          if (cmd === 'network') {
+            // Special handling for network command
+            card.innerHTML = `
+              <div class="network-section">
+                <h3 class="card-title"><i data-lucide="shield"></i> Firewall & DNS</h3>
+                ${renderTools(tools["Firewall & DNS"])}
+              </div>
+              <div class="network-section">
+                <h3 class="card-title"><i data-lucide="lock"></i> VPN Services</h3>
+                ${renderTools(tools["VPN Services"])}
+              </div>
+            `;
+          } else {
+            // Standard category display
+            const categoryMap = {
+              tools: { name: "Windows & Hardware Tools", icon: "cpu" },
+              antivirus: { name: "Antivirus & Security", icon: "shield" },
+              media: { name: "Media Applications", icon: "play" }
+            };
+            
+            const category = categoryMap[cmd];
+            card.innerHTML = `
+              <h3 class="card-title"><i data-lucide="${category.icon}"></i> ${category.name}</h3>
+              ${renderTools(tools[category.name])}
+            `;
+          }
+          
+          response.appendChild(card);
+          // Refresh icons immediately after adding new elements
+          setTimeout(() => lucide.createIcons(), 0);
+        } else {
+          response.textContent = `Command not found: ${cmd}. Type 'help' for available commands.`;
+        }
+        
+        terminal.appendChild(response);
+        terminal.scrollTop = terminal.scrollHeight;
+        input.focus();
+      }
+      
+      function renderTools(toolList, indent = 0) {
+        let html = '';
+        for (const tool of toolList) {
+          html += `
+            <div class="tool-item" style="padding-left: ${16 + (indent * 16)}px">
+              ${tool.url ? `<a href="${tool.url}" class="tool-link" target="_blank">${tool.name}</a>` : tool.name}
+              ${tool.desc ? `<span class="tool-desc">${tool.desc}</span>` : ''}
+            </div>
+          `;
+          
+          if (tool.subitems) {
+            html += renderTools(tool.subitems, indent + 1);
+          }
+        }
+        return html;
+      }
+      
+      // Handle input
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          processCommand(input.value);
+          input.value = '';
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (commandHistory.length > 0) {
+            if (historyIndex > 0) historyIndex--;
+            if (historyIndex >= 0) {
+              input.value = commandHistory[historyIndex];
+              input.selectionStart = input.selectionEnd = input.value.length;
+            }
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (historyIndex < commandHistory.length - 1) {
+            historyIndex++;
+            input.value = commandHistory[historyIndex] || '';
+          } else {
+            historyIndex = commandHistory.length;
+            input.value = '';
+          }
+          input.selectionStart = input.selectionEnd = input.value.length;
+        }
+      });
+      
+      // Focus input on click anywhere
+      document.addEventListener('click', () => {
+        input.focus();
+      });
+      
+      // Initial focus
+      input.focus();
+    });
+  </script>
+</body>
+</html>
