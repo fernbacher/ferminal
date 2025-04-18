@@ -431,7 +431,7 @@
             input.value = '';
           }
         }
-        input.selectionStart = input.selectionEnd = input.value.length;
+        // No preventDefault() for backspace or other keys to allow normal input behavior
       });
 
       document.addEventListener('click', () => input.focus());
